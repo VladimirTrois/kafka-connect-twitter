@@ -13,13 +13,7 @@
     <name>kafka-connect-twitter</name>
     <url>https://github.com/jcustenborder/kafka-connect-twitter</url>
     <inceptionYear>2016</inceptionYear>
-
-    <description>
-        Kafka Connect plugin for streaming data from Twitter to Kafka.
-        This plugins belong to jcustenborder.
-        Small changement have been made for testing.
-    </description>
-
+    <description>Kafka Connect plugin for streaming data from Twitter to Kafka.</description>
     <licenses>
         <license>
             <name>Apache License 2.0</name>
@@ -37,6 +31,15 @@
             </roles>
         </developer>
     </developers>
+    <scm>
+        <connection>scm:git:https://github.com/jcustenborder/kafka-connect-twitter.git</connection>
+        <developerConnection>scm:git:git@github.com:jcustenborder/kafka-connect-twitter.git</developerConnection>
+        <url>https://github.com/jcustenborder/kafka-connect-twitter</url>
+    </scm>
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/jcustenborder/kafka-connect-twitter/issues</url>
+    </issueManagement>
     <properties>
         <twitter4j.version>4.0.7</twitter4j.version>
     </properties>
