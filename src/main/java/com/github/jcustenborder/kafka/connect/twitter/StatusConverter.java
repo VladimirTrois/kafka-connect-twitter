@@ -35,8 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StatusConverter
-{
+public class StatusConverter {
 
   public static final Schema STATUS_SCHEMA_KEY;
   public static final Schema STATUS_SCHEMA;
@@ -100,8 +99,7 @@ public class StatusConverter
       .field("WithheldInCountries", SchemaBuilder.array(Schema.STRING_SCHEMA).doc("Returns the list of country codes where the user is withheld").build())
       .build();
 
-  static
-  {
+  static {
     PLACE_SCHEMA = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.Place")
         .optional()
@@ -117,8 +115,7 @@ public class StatusConverter
         .build();
   }
 
-  static
-  {
+  static {
     GEO_LOCATION_SCHEMA = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.GeoLocation")
         .optional()
@@ -128,8 +125,7 @@ public class StatusConverter
         .build();
   }
 
-  static
-  {
+  static {
     STATUS_SCHEMA_KEY = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.StatusKey")
         .doc("Key for a twitter status.")
@@ -206,8 +202,7 @@ public class StatusConverter
       .field("End", SchemaBuilder.int32().optional().doc("Returns the index of the end character of the user mention.").build())
       .build();
 
-  static
-  {
+  static {
     RETWEETED_STATUS_SCHEMA = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.RetweetedStatus")
         .doc("Returns some information of Retweeted Status, (CreatedAt, Id, Text, User...")
@@ -221,8 +216,7 @@ public class StatusConverter
         .build();
   }
 
-  static
-  {
+  static {
     STATUS_SCHEMA = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.Status")
         .doc("Twitter status message.")
@@ -258,8 +252,7 @@ public class StatusConverter
         .build();
   }
 
-  static
-  {
+  static {
     SCHEMA_STATUS_DELETION_NOTICE = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.StatusDeletionNotice")
         .doc("Message that is received when a status is deleted from Twitter.")
@@ -268,8 +261,7 @@ public class StatusConverter
         .build();
   }
 
-  static
-  {
+  static {
     SCHEMA_STATUS_DELETION_NOTICE_KEY = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.StatusDeletionNoticeKey")
         .doc("Key for a message that is received when a status is deleted from Twitter.")
@@ -277,25 +269,21 @@ public class StatusConverter
         .build();
   }
 
-  static Map<Integer, Struct> convertSizes(Map<Integer, MediaEntity.Size> items)
-  {
+  static Map<Integer, Struct> convertSizes(Map<Integer, MediaEntity.Size> items) {
     Map<Integer, Struct> results = new LinkedHashMap<>();
 
-    if (items == null)
-    {
+    if (items == null) {
       return results;
     }
 
-    for (Map.Entry<Integer, MediaEntity.Size> kvp : items.entrySet())
-    {
+    for (Map.Entry<Integer, MediaEntity.Size> kvp : items.entrySet()) {
       results.put(kvp.getKey(), convertMediaEntitySize(kvp.getValue()));
     }
 
     return results;
   }
 
-  public static void convert(User user, Struct struct)
-  {
+  public static void convert(User user, Struct struct) {
     struct
         .put("Id", user.getId())
         .put("Name", user.getName())
@@ -346,10 +334,8 @@ public class StatusConverter
         .put("FollowRequestSent", user.isFollowRequestSent());
 
     List<String> withheldInCountries = new ArrayList<>();
-    if (null != user.getWithheldInCountries())
-    {
-      for (String s : user.getWithheldInCountries())
-      {
+    if (null != user.getWithheldInCountries()) {
+      for (String s : user.getWithheldInCountries()) {
         withheldInCountries.add(s);
       }
     }
@@ -357,10 +343,8 @@ public class StatusConverter
 
   }
 
-  public static void convert(Place place, Struct struct)
-  {
-    if (null == place)
-    {
+  public static void convert(Place place, Struct struct) {
+    if (null == place) {
       return;
     }
     struct.put("Name", place.getName())
@@ -373,10 +357,8 @@ public class StatusConverter
         .put("FullName", place.getFullName());
   }
 
-  public static void convert(GeoLocation geoLocation, Struct struct)
-  {
-    if (null == geoLocation)
-    {
+  public static void convert(GeoLocation geoLocation, Struct struct) {
+    if (null == geoLocation) {
       return;
     }
     struct.put("Latitude", geoLocation.getLatitude())
@@ -384,23 +366,19 @@ public class StatusConverter
   }
 
 
-  static Struct convertMediaEntityVariant(MediaEntity.Variant variant)
-  {
+  static Struct convertMediaEntityVariant(MediaEntity.Variant variant) {
     return new Struct(SCHEMA_MEDIA_ENTITY_VARIANT)
         .put("Url", variant.getUrl())
         .put("Bitrate", variant.getBitrate())
         .put("ContentType", variant.getContentType());
   }
 
-  public static List<Struct> convert(MediaEntity.Variant[] items)
-  {
+  public static List<Struct> convert(MediaEntity.Variant[] items) {
     List<Struct> result = new ArrayList<>();
-    if (null == items)
-    {
+    if (null == items) {
       return result;
     }
-    for (MediaEntity.Variant item : items)
-    {
+    for (MediaEntity.Variant item : items) {
       Struct struct = convertMediaEntityVariant(item);
       result.add(struct);
     }
@@ -408,23 +386,19 @@ public class StatusConverter
   }
 
 
-  static Struct convertMediaEntitySize(MediaEntity.Size size)
-  {
+  static Struct convertMediaEntitySize(MediaEntity.Size size) {
     return new Struct(SCHEMA_MEDIA_ENTITY_SIZE)
         .put("Resize", size.getResize())
         .put("Width", size.getWidth())
         .put("Height", size.getHeight());
   }
 
-  public static List<Struct> convert(MediaEntity.Size[] items)
-  {
+  public static List<Struct> convert(MediaEntity.Size[] items) {
     List<Struct> result = new ArrayList<>();
-    if (null == items)
-    {
+    if (null == items) {
       return result;
     }
-    for (MediaEntity.Size item : items)
-    {
+    for (MediaEntity.Size item : items) {
       Struct struct = convertMediaEntitySize(item);
       result.add(struct);
     }
@@ -432,23 +406,19 @@ public class StatusConverter
   }
 
 
-  static Struct convertHashtagEntity(HashtagEntity hashtagEntity)
-  {
+  static Struct convertHashtagEntity(HashtagEntity hashtagEntity) {
     return new Struct(SCHEMA_HASHTAG_ENTITY)
         .put("Text", hashtagEntity.getText())
         .put("Start", hashtagEntity.getStart())
         .put("End", hashtagEntity.getEnd());
   }
 
-  public static List<Struct> convert(HashtagEntity[] items)
-  {
+  public static List<Struct> convert(HashtagEntity[] items) {
     List<Struct> result = new ArrayList<>();
-    if (null == items)
-    {
+    if (null == items) {
       return result;
     }
-    for (HashtagEntity item : items)
-    {
+    for (HashtagEntity item : items) {
       Struct struct = convertHashtagEntity(item);
       result.add(struct);
     }
@@ -456,8 +426,7 @@ public class StatusConverter
   }
 
 
-  static Struct convertMediaEntity(MediaEntity mediaEntity)
-  {
+  static Struct convertMediaEntity(MediaEntity mediaEntity) {
     return new Struct(SCHEMA_MEDIA_ENTITY)
         .put("Id", mediaEntity.getId())
         .put("Type", mediaEntity.getType())
@@ -477,15 +446,12 @@ public class StatusConverter
         .put("DisplayURL", mediaEntity.getDisplayURL());
   }
 
-  public static List<Struct> convert(MediaEntity[] items)
-  {
+  public static List<Struct> convert(MediaEntity[] items) {
     List<Struct> result = new ArrayList<>();
-    if (null == items)
-    {
+    if (null == items) {
       return result;
     }
-    for (MediaEntity item : items)
-    {
+    for (MediaEntity item : items) {
       Struct struct = convertMediaEntity(item);
       result.add(struct);
     }
@@ -493,23 +459,19 @@ public class StatusConverter
   }
 
 
-  static Struct convertSymbolEntity(SymbolEntity symbolEntity)
-  {
+  static Struct convertSymbolEntity(SymbolEntity symbolEntity) {
     return new Struct(SCHEMA_SYMBOL_ENTITY)
         .put("Start", symbolEntity.getStart())
         .put("End", symbolEntity.getEnd())
         .put("Text", symbolEntity.getText());
   }
 
-  public static List<Struct> convert(SymbolEntity[] items)
-  {
+  public static List<Struct> convert(SymbolEntity[] items) {
     List<Struct> result = new ArrayList<>();
-    if (null == items)
-    {
+    if (null == items) {
       return result;
     }
-    for (SymbolEntity item : items)
-    {
+    for (SymbolEntity item : items) {
       Struct struct = convertSymbolEntity(item);
       result.add(struct);
     }
@@ -517,8 +479,7 @@ public class StatusConverter
   }
 
 
-  static Struct convertURLEntity(URLEntity uRLEntity)
-  {
+  static Struct convertURLEntity(URLEntity uRLEntity) {
     return new Struct(SCHEMA_URL_ENTITY)
         .put("URL", uRLEntity.getURL())
         .put("Text", uRLEntity.getText())
@@ -528,15 +489,12 @@ public class StatusConverter
         .put("DisplayURL", uRLEntity.getDisplayURL());
   }
 
-  public static List<Struct> convert(URLEntity[] items)
-  {
+  public static List<Struct> convert(URLEntity[] items) {
     List<Struct> result = new ArrayList<>();
-    if (null == items)
-    {
+    if (null == items) {
       return result;
     }
-    for (URLEntity item : items)
-    {
+    for (URLEntity item : items) {
       Struct struct = convertURLEntity(item);
       result.add(struct);
     }
@@ -544,8 +502,7 @@ public class StatusConverter
   }
 
 
-  static Struct convertUserMentionEntity(UserMentionEntity userMentionEntity)
-  {
+  static Struct convertUserMentionEntity(UserMentionEntity userMentionEntity) {
     return new Struct(SCHEMA_USER_MENTION_ENTITY)
         .put("Name", userMentionEntity.getName())
         .put("Id", userMentionEntity.getId())
@@ -555,15 +512,12 @@ public class StatusConverter
         .put("End", userMentionEntity.getEnd());
   }
 
-  public static List<Struct> convert(UserMentionEntity[] items)
-  {
+  public static List<Struct> convert(UserMentionEntity[] items) {
     List<Struct> result = new ArrayList<>();
-    if (null == items)
-    {
+    if (null == items) {
       return result;
     }
-    for (UserMentionEntity item : items)
-    {
+    for (UserMentionEntity item : items) {
       Struct struct = convertUserMentionEntity(item);
       result.add(struct);
     }
@@ -571,13 +525,11 @@ public class StatusConverter
   }
 
 
-  public static void convertKey(Status status, Struct struct)
-  {
+  public static void convertKey(Status status, Struct struct) {
     struct.put("Id", status.getId());
   }
 
-  public static void convert(Status status, Struct struct)
-  {
+  public static void convert(Status status, Struct struct) {
     struct
         .put("CreatedAt", status.getCreatedAt())
         .put("Id", status.getId())
@@ -598,53 +550,43 @@ public class StatusConverter
         .put("Lang", status.getLang());
 
     Struct userStruct;
-    if (null != status.getUser())
-    {
+    if (null != status.getUser()) {
       userStruct = new Struct(USER_SCHEMA);
       convert(status.getUser(), userStruct);
-    } else
-    {
+    } else {
       userStruct = null;
     }
     struct.put("User", userStruct);
 
     Struct placeStruct;
-    if (null != status.getPlace())
-    {
+    if (null != status.getPlace()) {
       placeStruct = new Struct(PLACE_SCHEMA);
       convert(status.getPlace(), placeStruct);
-    } else
-    {
+    } else {
       placeStruct = null;
     }
     struct.put("Place", placeStruct);
 
     Struct geoLocationStruct;
-    if (null != status.getGeoLocation())
-    {
+    if (null != status.getGeoLocation()) {
       geoLocationStruct = new Struct(GEO_LOCATION_SCHEMA);
       convert(status.getGeoLocation(), geoLocationStruct);
-    } else
-    {
+    } else {
       geoLocationStruct = null;
     }
     struct.put("GeoLocation", geoLocationStruct);
     List<Long> contributers = new ArrayList<>();
 
-    if (null != status.getContributors())
-    {
-      for (Long l : status.getContributors())
-      {
+    if (null != status.getContributors()) {
+      for (Long l : status.getContributors()) {
         contributers.add(l);
       }
     }
     struct.put("Contributors", contributers);
 
     List<String> withheldInCountries = new ArrayList<>();
-    if (null != status.getWithheldInCountries())
-    {
-      for (String s : status.getWithheldInCountries())
-      {
+    if (null != status.getWithheldInCountries()) {
+      for (String s : status.getWithheldInCountries()) {
         withheldInCountries.add(s);
       }
     }
@@ -657,14 +599,12 @@ public class StatusConverter
     struct.put("URLEntities", convert(status.getURLEntities()));
   }
 
-  public static void convert(StatusDeletionNotice statusDeletionNotice, Struct struct)
-  {
+  public static void convert(StatusDeletionNotice statusDeletionNotice, Struct struct) {
     struct.put("StatusId", statusDeletionNotice.getStatusId());
     struct.put("UserId", statusDeletionNotice.getUserId());
   }
 
-  public static void convertKey(StatusDeletionNotice statusDeletionNotice, Struct struct)
-  {
+  public static void convertKey(StatusDeletionNotice statusDeletionNotice, Struct struct) {
     struct.put("StatusId", statusDeletionNotice.getStatusId());
   }
 }
