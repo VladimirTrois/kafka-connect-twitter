@@ -46,6 +46,9 @@ public class StatusConverter {
   public static final Schema STATUS_SCHEMA_KEY;
   public static final Schema STATUS_SCHEMA;
 
+  //Added by Vladimir Trois for retweet status;
+  public static final Schema RETWEETED_STATUS_SCHEMA;
+
   public static final Schema USER_SCHEMA = SchemaBuilder.struct()
       .name("com.github.jcustenborder.kafka.connect.twitter.User")
       .doc("Return the user associated with the status. This can be null if the instance is from User.getStatus().")
@@ -222,6 +225,21 @@ public class StatusConverter {
       .field("End", SchemaBuilder.int32().optional().doc("Returns the index of the end character of the user mention.").build())
       .build();
 
+  //Added by Vladimir Trois for retweet status;
+  static {
+    RETWEETED_STATUS_SCHEMA = SchemaBuilder.struct()
+        .name("com.github.jcustenborder.kafka.connect.twitter.RetweetedStatus")
+        .doc("Returns some information of Retweeted Status, (CreatedAt, Id, Text, User...")
+        .field("CreatedAt", Timestamp.builder().doc("Return the created_at").optional().build())
+        .field("Id", SchemaBuilder.int64().doc("Returns the id of the status").optional().build())
+        .field("Text", SchemaBuilder.string().doc("Returns the text of the status").optional().build())
+        .field("User", USER_SCHEMA)
+        .field("Lang", SchemaBuilder.string().doc("Returns the lang of the status text if available.").optional().build())
+        .field("HashtagEntities", SchemaBuilder.array(SCHEMA_HASHTAG_ENTITY).doc("Returns an array if hashtag mentioned in the tweet.").optional().build())
+
+        .build();
+  }
+
   static {
     STATUS_SCHEMA = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.Status")
@@ -238,6 +256,10 @@ public class StatusConverter {
         .field("Place", PLACE_SCHEMA)
         .field("Favorited", SchemaBuilder.bool().doc("Test if the status is favorited").optional().build())
         .field("Retweeted", SchemaBuilder.bool().doc("Test if the status is retweeted").optional().build())
+
+        //Added by Vladimir Trois for retweet status;
+        .field("RetweetedStatus", RETWEETED_STATUS_SCHEMA)
+
         .field("FavoriteCount", SchemaBuilder.int32().doc("Indicates approximately how many times this Tweet has been \"favorited\" by Twitter users.").optional().build())
         .field("User", USER_SCHEMA)
         .field("Retweet", SchemaBuilder.bool().optional().build())
@@ -369,7 +391,6 @@ public class StatusConverter {
     struct.put("Latitude", geoLocation.getLatitude())
         .put("Longitude", geoLocation.getLongitude());
   }
-
 
   static Struct convertMediaEntityVariant(MediaEntity.Variant variant) {
     return new Struct(SCHEMA_MEDIA_ENTITY_VARIANT)
@@ -567,6 +588,30 @@ public class StatusConverter {
     struct.put("Id", status.getId());
   }
 
+  //Added by Vladimir Trois for retweet status;
+  public static void convert(Status retweetedStatus, Struct struct, boolean retweeted) {
+    if (false == retweeted) {
+      return;
+    }
+    struct
+        .put("CreatedAt", retweetedStatus.getCreatedAt())
+        .put("Id", retweetedStatus.getId())
+        .put("Text", retweetedStatus.getText())
+        .put("Lang", retweetedStatus.getLang());
+
+    Struct userStruct;
+    if (null != retweetedStatus.getUser()) {
+      userStruct = new Struct(USER_SCHEMA);
+      convert(retweetedStatus.getUser(), userStruct);
+    } else {
+      userStruct = null;
+    }
+    struct.put("User", userStruct);
+
+    struct.put("HashtagEntities", convert(retweetedStatus.getHashtagEntities()));
+  }
+  //--------------
+
   public static void convert(Status status, Struct struct) {
     struct
         .put("CreatedAt", status.getCreatedAt())
@@ -613,8 +658,8 @@ public class StatusConverter {
       geoLocationStruct = null;
     }
     struct.put("GeoLocation", geoLocationStruct);
-    List<Long> contributers = new ArrayList<>();
 
+    List<Long> contributers = new ArrayList<>();
     if (null != status.getContributors()) {
       for (Long l : status.getContributors()) {
         contributers.add(l);
@@ -635,6 +680,16 @@ public class StatusConverter {
     struct.put("MediaEntities", convert(status.getMediaEntities()));
     struct.put("SymbolEntities", convert(status.getSymbolEntities()));
     struct.put("URLEntities", convert(status.getURLEntities()));
+
+    //Added by Vladimir Trois for retweet status;
+    Struct retweetedStatus;
+    if (null != status.getRetweetedStatus()) {
+      retweetedStatus = new Struct(RETWEETED_STATUS_SCHEMA);
+      convert(status.getRetweetedStatus(), retweetedStatus, true);
+    } else {
+      retweetedStatus = null;
+    }
+    struct.put("RetweetedStatus", retweetedStatus);
   }
 
   public static void convert(StatusDeletionNotice statusDeletionNotice, Struct struct) {
