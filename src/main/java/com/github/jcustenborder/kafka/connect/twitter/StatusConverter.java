@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016 Jeremy Custenborder (jcustenborder@gmail.com)
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.data.Timestamp;
+import twitter4j.ExtendedMediaEntity;
 import twitter4j.GeoLocation;
 import twitter4j.HashtagEntity;
 import twitter4j.MediaEntity;
@@ -37,14 +38,13 @@ import java.util.Map;
 
 public class StatusConverter {
 
-  public static final Schema STATUS_SCHEMA_KEY;
-  public static final Schema STATUS_SCHEMA;
-  public static final Schema RETWEETED_STATUS_SCHEMA;
 
   public final static Schema PLACE_SCHEMA;
   public final static Schema GEO_LOCATION_SCHEMA;
   public static final Schema SCHEMA_STATUS_DELETION_NOTICE;
   public static final Schema SCHEMA_STATUS_DELETION_NOTICE_KEY;
+  public static final Schema STATUS_SCHEMA_KEY;
+  public static final Schema STATUS_SCHEMA;
 
   public static final Schema USER_SCHEMA = SchemaBuilder.struct()
       .name("com.github.jcustenborder.kafka.connect.twitter.User")
@@ -147,6 +147,26 @@ public class StatusConverter {
       .field("Width", SchemaBuilder.int32().optional().doc("").build())
       .field("Height", SchemaBuilder.int32().optional().doc("").build())
       .build();
+  public static final Schema SCHEMA_EXTENDED_MEDIA_ENTITY = SchemaBuilder.struct()
+      .name("com.github.jcustenborder.kafka.connect.twitter.ExtendedMediaEntity")
+      .doc("")
+      .field("VideoAspectRatioWidth", SchemaBuilder.int32().optional().doc("").build())
+      .field("VideoAspectRatioHeight", SchemaBuilder.int32().optional().doc("").build())
+      .field("VideoDurationMillis", SchemaBuilder.int64().optional().doc("").build())
+      .field("VideoVariants", SchemaBuilder.array(SCHEMA_MEDIA_ENTITY_VARIANT).optional().doc("").build())
+      .field("ExtAltText", SchemaBuilder.string().optional().doc("").build())
+      .field("Id", SchemaBuilder.int64().optional().doc("Returns the id of the media.").build())
+      .field("Type", SchemaBuilder.string().optional().doc("Returns the media type photo, video, animated_gif.").build())
+      .field("MediaURL", SchemaBuilder.string().optional().doc("Returns the media URL.").build())
+      .field("Sizes", SchemaBuilder.map(Schema.INT32_SCHEMA, SCHEMA_MEDIA_ENTITY_SIZE).doc("Returns size variations of the media.").build())
+      .field("MediaURLHttps", SchemaBuilder.string().optional().doc("Returns the media secure URL.").build())
+      .field("URL", SchemaBuilder.string().optional().doc("Returns the URL mentioned in the tweet.").build())
+      .field("Text", SchemaBuilder.string().optional().doc("Returns the URL mentioned in the tweet.").build())
+      .field("ExpandedURL", SchemaBuilder.string().optional().doc("Returns the expanded URL if mentioned URL is shorten.").build())
+      .field("Start", SchemaBuilder.int32().optional().doc("Returns the index of the start character of the URL mentioned in the tweet.").build())
+      .field("End", SchemaBuilder.int32().optional().doc("Returns the index of the end character of the URL mentioned in the tweet.").build())
+      .field("DisplayURL", SchemaBuilder.string().optional().doc("Returns the display URL if mentioned URL is shorten.").build())
+      .build();
   public static final Schema SCHEMA_HASHTAG_ENTITY = SchemaBuilder.struct()
       .name("com.github.jcustenborder.kafka.connect.twitter.HashtagEntity")
       .doc("")
@@ -203,20 +223,6 @@ public class StatusConverter {
       .build();
 
   static {
-    RETWEETED_STATUS_SCHEMA = SchemaBuilder.struct()
-        .name("com.github.jcustenborder.kafka.connect.twitter.RetweetedStatus")
-        .doc("Returns some information of Retweeted Status, (CreatedAt, Id, Text, User...")
-        .field("CreatedAt", Timestamp.builder().doc("Return the created_at").optional().build())
-        .field("Id", SchemaBuilder.int64().doc("Returns the id of the status").optional().build())
-        .field("Text", SchemaBuilder.string().doc("Returns the text of the status").optional().build())
-        .field("User", USER_SCHEMA)
-        .field("Lang", SchemaBuilder.string().doc("Returns the lang of the status text if available.").optional().build())
-        .field("HashtagEntities", SchemaBuilder.array(SCHEMA_HASHTAG_ENTITY).doc("Returns an array if hashtag mentioned in the tweet.").optional().build())
-
-        .build();
-  }
-
-  static {
     STATUS_SCHEMA = SchemaBuilder.struct()
         .name("com.github.jcustenborder.kafka.connect.twitter.Status")
         .doc("Twitter status message.")
@@ -232,7 +238,6 @@ public class StatusConverter {
         .field("Place", PLACE_SCHEMA)
         .field("Favorited", SchemaBuilder.bool().doc("Test if the status is favorited").optional().build())
         .field("Retweeted", SchemaBuilder.bool().doc("Test if the status is retweeted").optional().build())
-        .field("RetweetedStatus", RETWEETED_STATUS_SCHEMA)
         .field("FavoriteCount", SchemaBuilder.int32().doc("Indicates approximately how many times this Tweet has been \"favorited\" by Twitter users.").optional().build())
         .field("User", USER_SCHEMA)
         .field("Retweet", SchemaBuilder.bool().optional().build())
@@ -400,6 +405,39 @@ public class StatusConverter {
     }
     for (MediaEntity.Size item : items) {
       Struct struct = convertMediaEntitySize(item);
+      result.add(struct);
+    }
+    return result;
+  }
+
+
+  static Struct convertExtendedMediaEntity(ExtendedMediaEntity extendedMediaEntity) {
+    return new Struct(SCHEMA_EXTENDED_MEDIA_ENTITY)
+        .put("VideoAspectRatioWidth", extendedMediaEntity.getVideoAspectRatioWidth())
+        .put("VideoAspectRatioHeight", extendedMediaEntity.getVideoAspectRatioHeight())
+        .put("VideoDurationMillis", extendedMediaEntity.getVideoDurationMillis())
+        .put("VideoVariants", extendedMediaEntity.getVideoVariants())
+        .put("ExtAltText", extendedMediaEntity.getExtAltText())
+        .put("Id", extendedMediaEntity.getId())
+        .put("Type", extendedMediaEntity.getType())
+        .put("MediaURL", extendedMediaEntity.getMediaURL())
+        .put("Sizes", extendedMediaEntity.getSizes())
+        .put("MediaURLHttps", extendedMediaEntity.getMediaURLHttps())
+        .put("URL", extendedMediaEntity.getURL())
+        .put("Text", extendedMediaEntity.getText())
+        .put("ExpandedURL", extendedMediaEntity.getExpandedURL())
+        .put("Start", extendedMediaEntity.getStart())
+        .put("End", extendedMediaEntity.getEnd())
+        .put("DisplayURL", extendedMediaEntity.getDisplayURL());
+  }
+
+  public static List<Struct> convert(ExtendedMediaEntity[] items) {
+    List<Struct> result = new ArrayList<>();
+    if (null == items) {
+      return result;
+    }
+    for (ExtendedMediaEntity item : items) {
+      Struct struct = convertExtendedMediaEntity(item);
       result.add(struct);
     }
     return result;

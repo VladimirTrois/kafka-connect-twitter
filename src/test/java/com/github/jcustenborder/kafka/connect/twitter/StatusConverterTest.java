@@ -173,7 +173,6 @@ public class StatusConverterTest {
     assertEquals(status.getInReplyToScreenName(), struct.get("InReplyToScreenName"), "InReplyToScreenName does not match.");
     assertEquals(status.isFavorited(), struct.get("Favorited"), "Favorited does not match.");
     assertEquals(status.isRetweeted(), struct.get("Retweeted"), "Retweeted does not match.");
-    assertEquals(status.getRetweetedStatus(), struct.get("RetweetedStatus"), "Retweeted does not match.");
     assertEquals(status.getFavoriteCount(), struct.get("FavoriteCount"), "FavoriteCount does not match.");
     assertEquals(status.isRetweet(), struct.get("Retweet"), "Retweet does not match.");
     assertEquals(status.getRetweetCount(), struct.get("RetweetCount"), "RetweetCount does not match.");
