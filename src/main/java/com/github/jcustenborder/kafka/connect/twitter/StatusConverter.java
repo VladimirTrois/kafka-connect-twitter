@@ -590,7 +590,7 @@ public class StatusConverter {
 
   //Added by Vladimir Trois for retweet status;
   public static void convert(Status retweetedStatus, Struct struct, boolean retweeted) {
-    if (false == retweeted) {
+    if (!retweeted) {
       return;
     }
     struct
