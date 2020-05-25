@@ -227,7 +227,7 @@ public class StatusConverter {
 
   //Added by Vladimir Trois for retweet status;
   static {
-    RETWEETED_STATUS_SCHEMA = SchemaBuilder.struct()
+    RETWEETED_STATUS_SCHEMA = SchemaBuilder.struct().optional()
         .name("com.github.jcustenborder.kafka.connect.twitter.RetweetedStatus")
         .doc("Returns some information of Retweeted Status, (CreatedAt, Id, Text, User...")
         .field("CreatedAt", Timestamp.builder().doc("Return the created_at").optional().build())
